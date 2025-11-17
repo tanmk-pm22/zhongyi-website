@@ -14,7 +14,7 @@ export function GeneratedImage({ imageUrl, title = "AI剪纸作品" }: Generated
   const printRef = useRef<HTMLDivElement>(null);
 
   const handlePrint = useReactToPrint({
-    contentRef: printRef,
+    content: () => printRef.current,
     documentTitle: title,
   });
 

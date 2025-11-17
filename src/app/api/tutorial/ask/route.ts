@@ -1,10 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 
-const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY,
-});
-
 const SYSTEM_PROMPT = `你是一位专业的中国传统剪纸艺术老师，精通各种剪纸技法和设计原则。你的任务是帮助用户学习剪纸艺术。
 
 你应该：
@@ -18,6 +14,10 @@ const SYSTEM_PROMPT = `你是一位专业的中国传统剪纸艺术老师，精
 
 export async function POST(request: NextRequest) {
   try {
+    const anthropic = new Anthropic({
+      apiKey: process.env.ANTHROPIC_API_KEY,
+    });
+
     const { question } = await request.json();
 
     if (!question) {
