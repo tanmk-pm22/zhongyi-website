@@ -7,7 +7,7 @@ export async function POST(request: NextRequest) {
       auth: process.env.REPLICATE_API_TOKEN,
     });
 
-    const { image, style, detailLevel } = await request.json();
+    const { image, style, detailLevel, cuttingMethod = "yang" } = await request.json();
 
     if (!image) {
       return NextResponse.json(
@@ -16,8 +16,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Build style-specific prompts
-    const styleConfig = getStyleConfig(style);
+    // Build style-specific prompts with cutting method
+    const styleConfig = getStyleConfig(style, cuttingMethod);
 
     // Calculate strength based on detail level
     const strength = Math.max(0.3, Math.min(0.9, detailLevel / 100));
@@ -52,6 +52,7 @@ export async function POST(request: NextRequest) {
       imageUrl,
       style,
       detailLevel,
+      cuttingMethod,
     });
   } catch (error) {
     console.error("Generation error:", error);
@@ -62,23 +63,39 @@ export async function POST(request: NextRequest) {
   }
 }
 
-function getStyleConfig(style: string) {
+function getStyleConfig(style: string, cuttingMethod: string) {
+  // Cutting method modifiers
+  const cuttingModifiers = {
+    yang: {
+      // 阳刻: Lines preserved, background removed (outline style)
+      suffix: ", positive cut style, preserved outlines, detailed line work, white lines on colored background, intricate borders preserved",
+      negative: ", solid fill, no outlines, silhouette only"
+    },
+    yin: {
+      // 阴刻: Background preserved, lines removed (silhouette style)
+      suffix: ", negative cut style, solid silhouette, filled shapes, colored shapes on white background, bold solid forms, no internal lines",
+      negative: ", outline only, line art, wireframe"
+    }
+  };
+
+  const cutting = cuttingModifiers[cuttingMethod as keyof typeof cuttingModifiers] || cuttingModifiers.yang;
+
   const configs: Record<string, { prompt: string; negativePrompt: string }> = {
     traditional: {
-      prompt: "Chinese paper cut art, jianzhi, red silhouette on white background, traditional folk art, intricate cutouts, symmetrical, high contrast, sharp edges",
-      negativePrompt: "gradient, soft edges, photorealistic, 3d, shadows, blurry",
+      prompt: `Chinese paper cut art, jianzhi, red and white, traditional folk art, intricate cutouts, symmetrical, high contrast, sharp edges${cutting.suffix}`,
+      negativePrompt: `gradient, soft edges, photorealistic, 3d, shadows, blurry${cutting.negative}`,
     },
     golden: {
-      prompt: "Chinese paper cut art, golden color on red background, festive, luxury, traditional patterns, intricate details, symmetrical design",
-      negativePrompt: "gradient, soft edges, photorealistic, 3d, shadows, blurry, silver",
+      prompt: `Chinese paper cut art, golden color on red background, festive, luxury, traditional patterns, intricate details, symmetrical design${cutting.suffix}`,
+      negativePrompt: `gradient, soft edges, photorealistic, 3d, shadows, blurry, silver${cutting.negative}`,
     },
     blue: {
-      prompt: "Chinese paper cut art in blue and white porcelain style, qinghua, delicate patterns, traditional Chinese, intricate cutouts",
-      negativePrompt: "gradient, soft edges, photorealistic, 3d, shadows, red",
+      prompt: `Chinese paper cut art in blue and white porcelain style, qinghua, delicate patterns, traditional Chinese, intricate cutouts${cutting.suffix}`,
+      negativePrompt: `gradient, soft edges, photorealistic, 3d, shadows, red${cutting.negative}`,
     },
     multicolor: {
-      prompt: "Multi-layered Chinese paper cut art, colorful, multiple layers, traditional folk art, vibrant colors, intricate patterns",
-      negativePrompt: "gradient, soft edges, photorealistic, 3d, blurry, monochrome",
+      prompt: `Multi-layered Chinese paper cut art, colorful, multiple layers, traditional folk art, vibrant colors, intricate patterns${cutting.suffix}`,
+      negativePrompt: `gradient, soft edges, photorealistic, 3d, blurry, monochrome${cutting.negative}`,
     },
   };
 
