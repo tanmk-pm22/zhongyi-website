@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>中药店管理系统 - 马来西亚SST报税</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div class="container">
+    <!-- 侧边导航 -->
+    <nav class="sidebar">
+      <div class="logo">
+        <h2>中药店管理</h2>
+        <small>SST报税系统</small>
+      </div>
+      <ul class="nav-menu">
+        <li><a href="#" data-page="dashboard" class="active">首页仪表板</a></li>
+        <li><a href="#" data-page="medicines">药品库存</a></li>
+        <li><a href="#" data-page="sales">销售记录</a></li>
+        <li><a href="#" data-page="purchases">进货记录</a></li>
+        <li><a href="#" data-page="suppliers">供应商管理</a></li>
+        <li><a href="#" data-page="reports">税务报表</a></li>
+        <li><a href="#" data-page="settings">系统设置</a></li>
+      </ul>
+    </nav>
+
+    <!-- 主内容区 -->
+    <main class="main-content">
+      <!-- 首页仪表板 -->
+      <section id="dashboard" class="page active">
+        <h1>首页仪表板</h1>
+        <div class="stats-grid">
+          <div class="stat-card">
+            <h3>今日销售</h3>
+            <p class="stat-value" id="today-sales">RM 0.00</p>
+            <small>税金: <span id="today-tax">RM 0.00</span></small>
+          </div>
+          <div class="stat-card">
+            <h3>本月销售</h3>
+            <p class="stat-value" id="month-sales">RM 0.00</p>
+            <small>税金: <span id="month-tax">RM 0.00</span></small>
+          </div>
+          <div class="stat-card">
+            <h3>本年销售</h3>
+            <p class="stat-value" id="year-sales">RM 0.00</p>
+            <small>税金: <span id="year-tax">RM 0.00</span></small>
+          </div>
+          <div class="stat-card warning">
+            <h3>低库存提醒</h3>
+            <p class="stat-value" id="low-stock-count">0</p>
+            <small>种药品库存不足</small>
+          </div>
+        </div>
+
+        <div class="section-box">
+          <h2>低库存药品列表</h2>
+          <table id="low-stock-table">
+            <thead>
+              <tr>
+                <th>药品名称</th>
+                <th>当前库存</th>
+                <th>警告线</th>
+                <th>单位</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- 药品库存 -->
+      <section id="medicines" class="page">
+        <h1>药品库存管理</h1>
+        <div class="toolbar">
+          <button class="btn btn-primary" onclick="showModal('medicine-modal')">添加药品</button>
+          <input type="text" id="medicine-search" placeholder="搜索药品..." oninput="searchMedicines()">
+        </div>
+        <table id="medicines-table">
+          <thead>
+            <tr>
+              <th>药品名称</th>
+              <th>单位</th>
+              <th>售价 (RM)</th>
+              <th>库存数量</th>
+              <th>低库存警告</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </section>
+
+      <!-- 销售记录 -->
+      <section id="sales" class="page">
+        <h1>销售记录</h1>
+        <div class="toolbar">
+          <button class="btn btn-primary" onclick="showModal('sale-modal')">新增销售</button>
+          <div class="date-filter">
+            <input type="date" id="sales-start-date">
+            <span>至</span>
+            <input type="date" id="sales-end-date">
+            <button class="btn" onclick="loadSales()">筛选</button>
+          </div>
+        </div>
+        <table id="sales-table">
+          <thead>
+            <tr>
+              <th>日期</th>
+              <th>药品名称</th>
+              <th>数量</th>
+              <th>单价</th>
+              <th>小计</th>
+              <th>税金</th>
+              <th>总计</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </section>
+
+      <!-- 进货记录 -->
+      <section id="purchases" class="page">
+        <h1>进货记录</h1>
+        <div class="toolbar">
+          <button class="btn btn-primary" onclick="showModal('purchase-modal')">新增进货</button>
+          <div class="date-filter">
+            <input type="date" id="purchases-start-date">
+            <span>至</span>
+            <input type="date" id="purchases-end-date">
+            <button class="btn" onclick="loadPurchases()">筛选</button>
+          </div>
+        </div>
+        <table id="purchases-table">
+          <thead>
+            <tr>
+              <th>日期</th>
+              <th>供应商</th>
+              <th>药品名称</th>
+              <th>数量</th>
+              <th>单价</th>
+              <th>总价</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </section>
+
+      <!-- 供应商管理 -->
+      <section id="suppliers" class="page">
+        <h1>供应商管理</h1>
+        <div class="toolbar">
+          <button class="btn btn-primary" onclick="showModal('supplier-modal')">添加供应商</button>
+        </div>
+        <table id="suppliers-table">
+          <thead>
+            <tr>
+              <th>供应商名称</th>
+              <th>联系人</th>
+              <th>电话</th>
+              <th>地址</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </section>
+
+      <!-- 税务报表 -->
+      <section id="reports" class="page">
+        <h1>税务报表</h1>
+        <div class="toolbar">
+          <select id="report-year"></select>
+          <select id="report-month">
+            <option value="all">全年</option>
+            <option value="01">1月</option>
+            <option value="02">2月</option>
+            <option value="03">3月</option>
+            <option value="04">4月</option>
+            <option value="05">5月</option>
+            <option value="06">6月</option>
+            <option value="07">7月</option>
+            <option value="08">8月</option>
+            <option value="09">9月</option>
+            <option value="10">10月</option>
+            <option value="11">11月</option>
+            <option value="12">12月</option>
+          </select>
+          <button class="btn" onclick="loadTaxReport()">查询</button>
+          <button class="btn btn-success" onclick="exportReport('tax')">导出税务报表</button>
+          <button class="btn btn-success" onclick="exportReport('sales')">导出销售明细</button>
+          <button class="btn btn-success" onclick="exportReport('inventory')">导出库存报表</button>
+        </div>
+
+        <div class="report-summary">
+          <div class="summary-item">
+            <label>销售额(不含税)</label>
+            <span id="report-subtotal">RM 0.00</span>
+          </div>
+          <div class="summary-item">
+            <label>SST税金</label>
+            <span id="report-tax">RM 0.00</span>
+          </div>
+          <div class="summary-item">
+            <label>总计(含税)</label>
+            <span id="report-total">RM 0.00</span>
+          </div>
+        </div>
+
+        <table id="report-table">
+          <thead>
+            <tr>
+              <th>日期/月份</th>
+              <th>销售额(不含税)</th>
+              <th>SST税金</th>
+              <th>总计(含税)</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </section>
+
+      <!-- 系统设置 -->
+      <section id="settings" class="page">
+        <h1>系统设置</h1>
+        <div class="settings-form">
+          <div class="form-group">
+            <label>SST税率 (%)</label>
+            <input type="number" id="tax-rate" step="0.1" min="0" max="100">
+            <small>马来西亚SST通常为 6% 或 10%</small>
+          </div>
+          <div class="form-group">
+            <label>低库存警告数量</label>
+            <input type="number" id="low-stock-warning" min="1">
+            <small>当库存低于此数量时显示警告</small>
+          </div>
+          <button class="btn btn-primary" onclick="saveSettings()">保存设置</button>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- 添加药品弹窗 -->
+  <div id="medicine-modal" class="modal">
+    <div class="modal-content">
+      <h2>添加/编辑药品</h2>
+      <form id="medicine-form">
+        <input type="hidden" id="medicine-id">
+        <div class="form-group">
+          <label>药品名称 *</label>
+          <input type="text" id="medicine-name" required>
+        </div>
+        <div class="form-group">
+          <label>单位</label>
+          <input type="text" id="medicine-unit" value="克">
+        </div>
+        <div class="form-group">
+          <label>售价 (RM) *</label>
+          <input type="number" id="medicine-price" step="0.01" required>
+        </div>
+        <div class="form-group">
+          <label>库存数量</label>
+          <input type="number" id="medicine-stock" step="0.01" value="0">
+        </div>
+        <div class="form-group">
+          <label>低库存警告线</label>
+          <input type="number" id="medicine-threshold" step="0.01" value="100">
+        </div>
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary">保存</button>
+          <button type="button" class="btn" onclick="hideModal('medicine-modal')">取消</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 新增销售弹窗 -->
+  <div id="sale-modal" class="modal">
+    <div class="modal-content">
+      <h2>新增销售</h2>
+      <form id="sale-form">
+        <div class="form-group">
+          <label>药品 *</label>
+          <select id="sale-medicine" required onchange="updateSalePrice()">
+            <option value="">请选择药品</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>数量 *</label>
+          <input type="number" id="sale-quantity" step="0.01" required oninput="calculateSaleTotal()">
+        </div>
+        <div class="form-group">
+          <label>单价 (RM)</label>
+          <input type="number" id="sale-price" step="0.01" required oninput="calculateSaleTotal()">
+        </div>
+        <div class="form-group">
+          <label>日期 *</label>
+          <input type="date" id="sale-date" required>
+        </div>
+        <div class="form-group">
+          <label>备注</label>
+          <input type="text" id="sale-notes">
+        </div>
+        <div class="sale-summary">
+          <p>小计: <span id="sale-subtotal">RM 0.00</span></p>
+          <p>税金: <span id="sale-tax">RM 0.00</span></p>
+          <p><strong>总计: <span id="sale-total">RM 0.00</span></strong></p>
+        </div>
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary">确认销售</button>
+          <button type="button" class="btn" onclick="hideModal('sale-modal')">取消</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 新增进货弹窗 -->
+  <div id="purchase-modal" class="modal">
+    <div class="modal-content">
+      <h2>新增进货</h2>
+      <form id="purchase-form">
+        <div class="form-group">
+          <label>供应商 *</label>
+          <select id="purchase-supplier" required>
+            <option value="">请选择供应商</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>药品 *</label>
+          <select id="purchase-medicine" required>
+            <option value="">请选择药品</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>数量 *</label>
+          <input type="number" id="purchase-quantity" step="0.01" required>
+        </div>
+        <div class="form-group">
+          <label>进货单价 (RM) *</label>
+          <input type="number" id="purchase-price" step="0.01" required>
+        </div>
+        <div class="form-group">
+          <label>进货日期 *</label>
+          <input type="date" id="purchase-date" required>
+        </div>
+        <div class="form-group">
+          <label>备注</label>
+          <input type="text" id="purchase-notes">
+        </div>
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary">确认进货</button>
+          <button type="button" class="btn" onclick="hideModal('purchase-modal')">取消</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 添加供应商弹窗 -->
+  <div id="supplier-modal" class="modal">
+    <div class="modal-content">
+      <h2>添加/编辑供应商</h2>
+      <form id="supplier-form">
+        <input type="hidden" id="supplier-id">
+        <div class="form-group">
+          <label>供应商名称 *</label>
+          <input type="text" id="supplier-name" required>
+        </div>
+        <div class="form-group">
+          <label>联系人</label>
+          <input type="text" id="supplier-contact">
+        </div>
+        <div class="form-group">
+          <label>电话</label>
+          <input type="text" id="supplier-phone">
+        </div>
+        <div class="form-group">
+          <label>地址</label>
+          <input type="text" id="supplier-address">
+        </div>
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary">保存</button>
+          <button type="button" class="btn" onclick="hideModal('supplier-modal')">取消</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="/js/app.js"></script>
+</body>
+</html>
