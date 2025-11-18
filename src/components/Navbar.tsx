@@ -11,6 +11,7 @@ export default function Navbar() {
     { href: '/', label: '首页' },
     { href: '/doctors', label: '医师团队' },
     { href: '/services', label: '服务项目' },
+    { href: '/register', label: '患者注册' },
     { href: '/booking', label: '在线预约' },
     { href: '/contact', label: '联系我们' },
   ]
