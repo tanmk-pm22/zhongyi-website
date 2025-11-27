@@ -9,8 +9,10 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@types/better-sqlite3": "^7.6.13",
     "@types/qrcode": "^1.5.6",
     "@types/uuid": "^10.0.0",
+    "better-sqlite3": "^12.4.6",
     "lucide-react": "^0.441.0",
     "next": "14.2.8",
     "qrcode": "^1.5.4",
